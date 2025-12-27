@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Коллекция банкнот | Россия на денежных купюрах</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Дополнительные стили для страницы коллекции */
+        .collection-hero {
+            background: linear-gradient(rgba(26, 35, 126, 0.85), rgba(40, 53, 147, 0.9));
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            margin-top: 70px;
+        }
+        
+        .collection-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s;
+        }
+        
+        .banknote-detail {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+        }
+        
+        .banknote-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .nominal-large {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #1a237e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .city-name {
+            font-size: 2rem;
+            color: #333;
+        }
+        
+        .banknote-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .banknote-image {
+            text-align: center;
+        }
+        
+        .banknote-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+            border: 1px solid #ddd;
+        }
+        
+        .banknote-image img:hover {
+            transform: scale(1.05);
+        }
+        
+        .image-caption {
+            margin-top: 10px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .banknote-info {
+            padding: 20px;
+        }
+        
+        .info-section {
+            margin-bottom: 25px;
+        }
+        
+        .info-section h3 {
+            color: #1a237e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #1a237e;
+        }
+        
+        .fact-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .banknote-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .nav-btn:hover {
+            background: #283593;
+            transform: translateX(-5px);
+        }
+        
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+        
+        .banknote-list {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .list-item {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .list-item.active {
+            background: #1a237e;
+            color: white;
+        }
+        
+        .list-item:hover {
+            background: #283593;
+            color: white;
+        }
+        
+        /* Стиль для заглушки, если картинка не загрузилась */
+        .banknote-image img::after {
+            content: "Изображение не найдено";
+            display: block;
+            padding: 20px;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 10px;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .banknote-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .collection-hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nominal-large {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка сайта -->
+    <header class="main-header">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-ruble-sign"></i>
+                <span>РубльГид</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> Главная</a></li>
+                <li><a href="collection.html" class="active"><i class="fas fa-money-bill-wave"></i> Коллекция</a></li>
+                <li><a href="quiz.html"><i class="fas fa-question-circle"></i> Викторина</a></li>
+                <li><a href="symbols.html"><i class="fas fa-dove"></i> Символика</a></li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Герой секция -->
+    <section class="collection-hero">
+        <div class="container">
+            <h1>Коллекция банкнот</h1>
+            <p>Подробная информация о каждой купюре современной России</p>
+        </div>
+    </section>
+
+    <!-- Навигация по купюрам -->
+    <div class="container">
+        <div class="banknote-list">
+            <div class="list-item active" data-banknote="10">10 ₽</div>
+            <div class="list-item" data-banknote="50">50 ₽</div>
+            <div class="list-item" data-banknote="100">100 ₽</div>
+            <div class="list-item" data-banknote="200">200 ₽</div>
+            <div class="list-item" data-banknote="500">500 ₽</div>
+            <div class="list-item" data-banknote="1000">1000 ₽</div>
+            <div class="list-item" data-banknote="5000">5000 ₽</div>
+        </div>
+    </div>
+
+    <!-- Детальная информация о купюрах -->
+    <div class="container">
+        <!-- Купюра 10 рублей -->
+        <div class="banknote-detail" id="banknote-10">
+            <div class="banknote-header">
+                <div class="nominal-large">
+                    <i class="fas fa-money-bill"></i>
+                    10 ₽
+                </div>
+                <div class="city-name">Красноярск</div>
+            </div>
+            
+            <div class="banknote-content">
+                <div class="banknote-image">
+                    <img src="images/10rub.jpg" alt="10 рублей - Красноярск" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/2E7D32/FFFFFF?text=10+%D1%80%D1%83%D0%B1%D0%BB%D0%B5%D0%B9%0A%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D1%8F%D1%80%D1%81%D0%BA'">
+                    <p class="image-caption">Банкнота образца 2022 года</p>
+                </div>
+                
+                <div class="banknote-info">
+                    <div class="info-section">
+                        <h3><i class="fas fa-city"></i> Основная информация</h3>
+                        <p><strong>Город:</strong> Красноярск</p>
+                        <p><strong>Год выпуска:</strong> 2022 (модификация)</p>
+                        <p><strong>Размеры:</strong> 150 × 65 мм</p>
+                        <p><strong>Основной цвет:</strong> Темно-зеленый, коричневый</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-landmark"></i> Изображения на купюре</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <strong>Лицевая сторона:</strong>
+                                <p>Коммунальный мост через Енисей</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Оборотная сторона:</strong>
+                                <p>Красноярская ГЭС</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Дополнительно:</strong>
+                                <p>Часовня Параскевы Пятницы</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-shield-alt"></i> Защитные элементы</h3>
+                        <ul>
+                            <li>Водяной знак с изображением часовни</li>
+                            <li>Защитная нить с микротекстом "10 РУБ"</li>
+                            <li>Скрытое изображение номинала</li>
+                            <li>Рельефные метки для слабовидящих</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h3><i class="fas fa-lightbulb"></i> Интересный факт</h3>
+                        <p>Это самая "молодая" купюра в обращении, дизайн которой был полностью обновлен в 2022 году. Коммунальный мост, изображенный на купюре, был построен в 1961 году и на момент строительства был самым длинным автомобильным мостом в Азии.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banknote-navigation">
+                <span></span>
+                <a href="#banknote-50" class="nav-btn next">
+                    Следующая купюра (50 ₽)
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Купюра 50 рублей -->
+        <div class="banknote-detail" id="banknote-50" style="display: none;">
+            <div class="banknote-header">
+                <div class="nominal-large">
+                    <i class="fas fa-money-bill"></i>
+                    50 ₽
+                </div>
+                <div class="city-name">Санкт-Петербург</div>
+            </div>
+            
+            <div class="banknote-content">
+                <div class="banknote-image">
+                    <img src="images/50rub.jpg" alt="50 рублей - Санкт-Петербург" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/1976D2/FFFFFF?text=50+%D1%80%D1%83%D0%B1%D0%BB%D0%B5%D0%B9%0A%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3'">
+                    <p class="image-caption">Банкнота образца 1997 года (модификация 2004)</p>
+                </div>
+                
+                <div class="banknote-info">
+                    <div class="info-section">
+                        <h3><i class="fas fa-city"></i> Основная информация</h3>
+                        <p><strong>Город:</strong> Санкт-Петербург</p>
+                        <p><strong>Год выпуска:</strong> 1997 (модификация 2004)</p>
+                        <p><strong>Размеры:</strong> 150 × 65 мм</p>
+                        <p><strong>Основной цвет:</strong> Голубой</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-landmark"></i> Изображения на купюре</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <strong>Лицевая сторона:</strong>
+                                <p>Скульптура у основания Ростральной колонны</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Оборотная сторона:</strong>
+                                <p>Петропавловская крепость</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Дополнительно:</strong>
+                                <p>Ростральная колонна на Стрелке Васильевского острова</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-paw"></i> Символика</h3>
+                        <p>На купюре изображена женская фигура с веслом, олицетворяющая реку Неву. Ростральные колонны ранее служили маяками для кораблей, а сегодня являются символами морской славы России.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h3><i class="fas fa-lightbulb"></i> Интересный факт</h3>
+                        <p>На банкноте 50 рублей есть несколько скрытых изображений. Если смотреть на купюру под острым углом, можно увидеть буквы "РР" (российский рубль) и номинал "50". Также при ультрафиолетовом свете проявляются дополнительные защитные элементы.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banknote-navigation">
+                <a href="#banknote-10" class="nav-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Предыдущая купюра (10 ₽)
+                </a>
+                <a href="#banknote-100" class="nav-btn next">
+                    Следующая купюра (100 ₽)
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Купюра 100 рублей -->
+        <div class="banknote-detail" id="banknote-100" style="display: none;">
+            <div class="banknote-header">
+                <div class="nominal-large">
+                    <i class="fas fa-money-bill"></i>
+                    100 ₽
+                </div>
+                <div class="city-name">Москва</div>
+            </div>
+            
+            <div class="banknote-content">
+                <div class="banknote-image">
+                    <img src="images/100rub.jpg" alt="100 рублей - Москва" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/795548/FFFFFF?text=100+%D1%80%D1%83%D0%B1%D0%BB%D0%B5%D0%B9%0A%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0'">
+                    <p class="image-caption">Банкнота образца 1997 года (модификация 2022)</p>
+                </div>
+                
+                <div class="banknote-info">
+                    <div class="info-section">
+                        <h3><i class="fas fa-city"></i> Основная информация</h3>
+                        <p><strong>Город:</strong> Москва</p>
+                        <p><strong>Год выпуска:</strong> 1997 (модификация 2022)</p>
+                        <p><strong>Размеры:</strong> 150 × 65 мм</p>
+                        <p><strong>Основной цвет:</strong> Коричнево-зеленый</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-landmark"></i> Изображения на купюре</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <strong>Лицевая сторона:</strong>
+                                <p>Квадрига Аполлона на портике Большого театра</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Оборотная сторона:</strong>
+                                <p>Здание Большого театра</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Орнамент:</strong>
+                                <p>Изображение соболя (символ Сибири)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-history"></i> Историческая справка</h3>
+                        <p>Большой театр был основан в 1776 году и является одним из крупнейших театров России и мира. Квадрига Аполлона на его фасаде была создана скульптором Петром Клодтом.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h3><i class="fas fa-lightbulb"></i> Интересный факт</h3>
+                        <p>Соболь на орнаменте купюры символизирует Сибирь, откуда в исторические времена шла активная торговля пушниной. Это напоминание о том, что Россия долгое время была крупнейшим поставщиком меха в Европу.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banknote-navigation">
+                <a href="#banknote-50" class="nav-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Предыдущая купюра (50 ₽)
+                </a>
+                <a href="#banknote-200" class="nav-btn next">
+                    Следующая купюра (200 ₽)
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Купюра 200 рублей -->
+        <div class="banknote-detail" id="banknote-200" style="display: none;">
+            <div class="banknote-header">
+                <div class="nominal-large">
+                    <i class="fas fa-money-bill"></i>
+                    200 ₽
+                </div>
+                <div class="city-name">Севастополь</div>
+            </div>
+            
+            <div class="banknote-content">
+                <div class="banknote-image">
+                    <img src="images/200rub.jpg" alt="200 рублей - Севастополь" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/388E3C/FFFFFF?text=200+%D1%80%D1%83%D0%B1%D0%BB%D0%B5%D0%B9%0A%D0%A1%D0%B5%D0%B2%D0%B0%D1%81%D1%82%D0%BE%D0%BF%D0%BE%D0%BB%D1%8C'">
+                    <p class="image-caption">Банкнота образца 2017 года</p>
+                </div>
+                
+                <div class="banknote-info">
+                    <div class="info-section">
+                        <h3><i class="fas fa-city"></i> Основная информация</h3>
+                        <p><strong>Город:</strong> Севастополь</p>
+                        <p><strong>Год выпуска:</strong> 2017</p>
+                        <p><strong>Размеры:</strong> 150 × 65 мм</p>
+                        <p><strong>Основной цвет:</strong> Зеленый</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-landmark"></i> Изображения на купюре</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <strong>Лицевая сторона:</strong>
+                                <p>Памятник затопленным кораблям</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Оборотная сторона:</strong>
+                                <p>Херсонес Таврический</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Дополнительно:</strong>
+                                <p>Вид на Севастопольскую бухту</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-qrcode"></i> Особенности</h3>
+                        <ul>
+                            <li>Первая российская банкнота с QR-кодом</li>
+                            <li>QR-код ведет на сайт Банка России</li>
+                            <li>Символический выбор цвета — морская волна</li>
+                            <li>Посвящена присоединению Крыма к России</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h3><i class="fas fa-lightbulb"></i> Интересный факт</h3>
+                        <p>Купюра 200 рублей — самая молодая в обращении после 10 рублей. Она была выпущена в 2017 году и стала первой российской банкнотой с QR-кодом, который ведет на страницу Банка России с описанием купюры. Памятник затопленным кораблям был установлен в 1905 году к 50-летию первой обороны Севастополя.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banknote-navigation">
+                <a href="#banknote-100" class="nav-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Предыдущая купюра (100 ₽)
+                </a>
+                <a href="#banknote-500" class="nav-btn next">
+                    Следующая купюра (500 ₽)
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Купюра 500 рублей -->
+        <div class="banknote-detail" id="banknote-500" style="display: none;">
+            <div class="banknote-header">
+                <div class="nominal-large">
+                    <i class="fas fa-money-bill"></i>
+                    500 ₽
+                </div>
+                <div class="city-name">Архангельск</div>
+            </div>
+            
+            <div class="banknote-content">
+                <div class="banknote-image">
+                    <img src="images/500rub.jpg" alt="500 рублей - Архангельск" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/7B1FA2/FFFFFF?text=500+%D1%80%D1%83%D0%B1%D0%BB%D0%B5%D0%B9%0A%D0%90%D1%80%D1%85%D0%B0%D0%BD%D0%B3%D0%B5%D0%BB%D1%8C%D1%81%D0%BA'">
+                    <p class="image-caption">Банкнота образца 1997 года (модификация 2010)</p>
+                </div>
+                
+                <div class="banknote-info">
+                    <div class="info-section">
+                        <h3><i class="fas fa-city"></i> Основная информация</h3>
+                        <p><strong>Город:</strong> Архангельск</p>
+                        <p><strong>Год выпуска:</strong> 1997 (модификация 2010)</p>
+                        <p><strong>Размеры:</strong> 150 × 65 мм</p>
+                        <p><strong>Основной цвет:</strong> Фиолетово-синий</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-landmark"></i> Изображения на купюре</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <strong>Лицевая сторона:</strong>
+                                <p>Памятник Петру I</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Оборотная сторона:</strong>
+                                <p>Соловецкий монастырь</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Орнамент:</strong>
+                                <p>Бурый медведь</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-history"></i> Историческая справка</h3>
+                        <p>Архангельск был основан по указу Ивана Грозного в 1584 году. Город стал первым морским портом России. Соловецкий монастырь, основанный в XV веке, является одним из самых северных православных монастырей и объектом Всемирного наследия ЮНЕСКО.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h3><i class="fas fa-lightbulb"></i> Интересный факт</h3>
+                        <p>Медведь на орнаменте купюры 500 рублей символизирует Русский Север. Архангельская область является одним из мест обитания бурого медведя в России. Соловецкий монастырь, изображенный на оборотной стороне, служил не только религиозным центром, но и важной крепостью на протяжении веков.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banknote-navigation">
+                <a href="#banknote-200" class="nav-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Предыдущая купюра (200 ₽)
+                </a>
+                <a href="#banknote-1000" class="nav-btn next">
+                    Следующая купюра (1000 ₽)
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Купюра 1000 рублей -->
+        <div class="banknote-detail" id="banknote-1000" style="display: none;">
+            <div class="banknote-header">
+                <div class="nominal-large">
+                    <i class="fas fa-money-bill"></i>
+                    1000 ₽
+                </div>
+                <div class="city-name">Ярославль</div>
+            </div>
+            
+            <div class="banknote-content">
+                <div class="banknote-image">
+                    <img src="images/1000rub.jpg" alt="1000 рублей - Ярославль" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/0288D1/FFFFFF?text=1000+%D1%80%D1%83%D0%B1%D0%BB%D0%B5%D0%B9%0A%D0%AF%D1%80%D0%BE%D1%81%D0%BB%D0%B0%D0%B2%D0%BB%D1%8C'">
+                    <p class="image-caption">Банкнота образца 1997 года (модификация 2010)</p>
+                </div>
+                
+                <div class="banknote-info">
+                    <div class="info-section">
+                        <h3><i class="fas fa-city"></i> Основная информация</h3>
+                        <p><strong>Город:</strong> Ярославль</p>
+                        <p><strong>Год выпуска:</strong> 1997 (модификация 2010)</p>
+                        <p><strong>Размеры:</strong> 157 × 69 мм</p>
+                        <p><strong>Основной цвет:</strong> Сине-зеленый</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-landmark"></i> Изображения на купюре</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <strong>Лицевая сторона:</strong>
+                                <p>Памятник Ярославу Мудрому</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Оборотная сторона:</strong>
+                                <p>Церковь Иоанна Предтечи</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Герб:</strong>
+                                <p>Ярославский медведь с секирой</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-unesco"></i> ЮНЕСКО</h3>
+                        <p>Исторический центр Ярославля включен в список Всемирного наследия ЮНЕСКО. На купюре изображены 16 архитектурных объектов, которые являются частью этого наследия. Церковь Иоанна Предтечи — один из самых известных храмов Ярославля, построенный в XVII веке.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h3><i class="fas fa-lightbulb"></i> Интересный факт</h3>
+                        <p>Ярославль был основан в 1010 году князем Ярославом Мудрым, чей памятник изображен на купюре. Согласно легенде, Ярослав убил медведя на месте будущего города, что отражено в гербе Ярославля — медведе с секирой. Церковь Иоанна Предтечи считается вершиной ярославской архитектурной школы.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banknote-navigation">
+                <a href="#banknote-500" class="nav-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Предыдущая купюра (500 ₽)
+                </a>
+                <a href="#banknote-5000" class="nav-btn next">
+                    Следующая купюра (5000 ₽)
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Купюра 5000 рублей -->
+        <div class="banknote-detail" id="banknote-5000" style="display: none;">
+            <div class="banknote-header">
+                <div class="nominal-large">
+                    <i class="fas fa-money-bill"></i>
+                    5000 ₽
+                </div>
+                <div class="city-name">Хабаровск</div>
+            </div>
+            
+            <div class="banknote-content">
+                <div class="banknote-image">
+                    <img src="images/5000rub.jpg" alt="5000 рублей - Хабаровск" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200/D32F2F/FFFFFF?text=5000+%D1%80%D1%83%D0%B1%D0%BB%D0%B5%D0%B9%0A%D0%A5%D0%B0%D0%B1%D0%B0%D1%80%D0%BE%D0%B2%D1%81%D0%BA'">
+                    <p class="image-caption">Банкнота образца 1997 года (модификация 2010)</p>
+                </div>
+                
+                <div class="banknote-info">
+                    <div class="info-section">
+                        <h3><i class="fas fa-city"></i> Основная информация</h3>
+                        <p><strong>Город:</strong> Хабаровск</p>
+                        <p><strong>Год выпуска:</strong> 1997 (модификация 2010)</p>
+                        <p><strong>Размеры:</strong> 157 × 69 мм</p>
+                        <p><strong>Основной цвет:</strong> Красно-оранжевый</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-landmark"></i> Изображения на купюре</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <strong>Лицевая сторона:</strong>
+                                <p>Памятник Муравьёву-Амурскому</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Оборотная сторона:</strong>
+                                <p>Мост через Амур</p>
+                            </div>
+                            <div class="feature-item">
+                                <strong>Орнамент:</strong>
+                                <p>Амурский тигр</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-history"></i> Историческая справка</h3>
+                        <p>Хабаровск был основан в 1858 году как военный пост. Назван в честь русского землепроходца Ерофея Хабарова. Памятник Николаю Муравьёву-Амурскому, генерал-губернатору Восточной Сибири, установлен в 1891 году. Мост через Амур, построенный в 1916 году, до 2017 года был самым длинным мостом Транссибирской магистрали.</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-shield-alt"></i> Защитные элементы</h3>
+                        <ul>
+                            <li>Водяной знак с портретом Муравьёва-Амурского</li>
+                            <li>Скрытое изображение букв "РР"</li>
+                            <li>Микротекст "5000"</li>
+                            <li>Рельефные надписи для слабовидящих</li>
+                            <li>Голографическая защитная нить</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h3><i class="fas fa-lightbulb"></i> Интересный факт</h3>
+                        <p>Амурский тигр, изображенный на орнаменте купюры, — самый крупный подвид тигра в мире и один из самых редких. Он занесен в Красную книгу России. Мост через Амур, изображенный на оборотной стороне, был построен всего за 3 года (1913-1916) и во время строительства считался чудом инженерной мысли.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banknote-navigation">
+                <a href="#banknote-1000" class="nav-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Предыдущая купюра (1000 ₽)
+                </a>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-ruble-sign"></i>
+                    <span>РубльГид</span>
+                    <p>Образовательный проект о российских банкнотах</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Быстрые ссылки</h4>
+                    <a href="index.html">Главная</a>
+                    <a href="collection.html">Коллекция</a>
+                    <a href="quiz.html">Викторина</a>
+                    <a href="symbols.html">Символика</a>
+                </div>
+                <div class="footer-info">
+                    <h4>Школьный проект</h4>
+                    <p>9 класс, 2026 год</p>
+                    <p>Тема: "Россия на денежных купюрах"</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 "Россия на денежных купюрах". Все права защищены.</p>
+                <div class="social-icons">
+                    <i class="fab fa-vk"></i>
+                    <i class="fab fa-telegram"></i>
+                    <i class="fab fa-youtube"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Скрипт для навигации по купюрам -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Меню для мобильных устройств
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                });
+            }
+            
+            // Закрытие меню при клике на ссылку
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                });
+            });
+            
+            // Навигация по купюрам через список
+            const banknoteItems = document.querySelectorAll('.list-item');
+            const banknoteDetails = document.querySelectorAll('.banknote-detail');
+            
+            // Показываем первую купюру по умолчанию
+            if (banknoteDetails[0]) {
+                banknoteDetails[0].style.display = 'block';
+            }
+            
+            banknoteItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Удаляем активный класс у всех
+                    banknoteItems.forEach(i => i.classList.remove('active'));
+                    // Добавляем активный класс текущему
+                    this.classList.add('active');
+                    
+                    // Скрываем все детали
+                    banknoteDetails.forEach(detail => {
+                        detail.style.display = 'none';
+                    });
+                    
+                    // Показываем выбранную купюру
+                    const banknoteId = this.getAttribute('data-banknote');
+                    const targetDetail = document.getElementById(`banknote-${banknoteId}`);
+                    if (targetDetail) {
+                        targetDetail.style.display = 'block';
+                        // Плавная прокрутка к выбранной купюре
+                        setTimeout(() => {
+                            targetDetail.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                    }
+                });
+            });
+            
+            // Навигация по кнопкам "Предыдущая/Следующая"
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (this.hash) {
+                        e.preventDefault();
+                        const targetId = this.hash.substring(1); // Убираем #
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            // Находим соответствующий элемент в списке
+                            const banknoteNum = targetId.split('-')[1];
+                            const listItem = document.querySelector(`.list-item[data-banknote="${banknoteNum}"]`);
+                            
+                            if (listItem) {
+                                // Имитируем клик на элемент списка
+                                listItem.click();
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Обработка прямых ссылок (если открыли страницу с #banknote-...)
+            if (window.location.hash) {
+                const hash = window.location.hash.substring(1); // Убираем #
+                const targetElement = document.getElementById(hash);
+                
+                if (targetElement && targetElement.classList.contains('banknote-detail')) {
+                    const banknoteNum = hash.split('-')[1];
+                    const listItem = document.querySelector(`.list-item[data-banknote="${banknoteNum}"]`);
+                    
+                    if (listItem) {
+                        setTimeout(() => {
+                            listItem.click();
+                        }, 500);
+                    }
+                }
+            }
+            
+            // Анимация появления элементов
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            // Наблюдаем за всеми банкнотными карточками
+            document.querySelectorAll('.banknote-detail').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.5s, transform 0.5s';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

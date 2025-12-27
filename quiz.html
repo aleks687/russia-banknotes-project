@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина | Россия на денежных купюрах</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Стили для викторины */
+        .quiz-hero {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%), 
+                       url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 120px 0 80px;
+            text-align: center;
+            margin-top: 70px;
+        }
+        
+        .quiz-hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .quiz-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .quiz-progress {
+            background: #f0f0f0;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .question-counter {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .option:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: translateY(-3px);
+        }
+        
+        .option.selected {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+        }
+        
+        .option.correct {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+        }
+        
+        .option.incorrect {
+            background: #ffcdd2;
+            border-color: #f44336;
+        }
+        
+        .option-letter {
+            width: 40px;
+            height: 40px;
+            background: #1a237e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        .quiz-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-prev {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            color: white;
+        }
+        
+        .quiz-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .quiz-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .result-score {
+            font-size: 5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a237e, #4CAF50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+        
+        .result-message {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            color: #666;
+        }
+        
+        .result-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .restart-btn {
+            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 152, 0, 0.3);
+        }
+        
+        .timer {
+            background: #fff3e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #e65100;
+            font-weight: bold;
+        }
+        
+        .hint {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .hint-btn {
+            background: #bbdefb;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .quiz-hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .question-card {
+                padding: 20px;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quiz-navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .quiz-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка сайта -->
+    <header class="main-header">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-ruble-sign"></i>
+                <span>РубльГид</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> Главная</a></li>
+                <li><a href="collection.html"><i class="fas fa-money-bill-wave"></i> Коллекция</a></li>
+                <li><a href="quiz.html" class="active"><i class="fas fa-question-circle"></i> Викторина</a></li>
+                <li><a href="symbols.html"><i class="fas fa-dove"></i> Символика</a></li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Герой секция викторины -->
+    <section class="quiz-hero">
+        <div class="container">
+            <h1>Викторина о российских банкнотах</h1>
+            <p>Проверьте свои знания и узнайте интересные факты</p>
+        </div>
+    </section>
+
+    <!-- Таймер (опционально) -->
+    <div class="container timer">
+        <i class="fas fa-clock"></i> Время: <span id="time">05:00</span>
+    </div>
+
+    <!-- Контейнер викторины -->
+    <div class="quiz-container">
+        <!-- Прогресс бар -->
+        <div class="quiz-progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <!-- Счетчик вопросов -->
+        <div class="question-counter" id="questionCounter">
+            Вопрос 1 из 10
+        </div>
+
+        <!-- Контейнер для вопросов -->
+        <div id="quizQuestions"></div>
+
+        <!-- Контейнер для результатов -->
+        <div class="result-container" id="resultContainer">
+            <i class="fas fa-trophy" style="font-size: 4rem; color: #FFD700;"></i>
+            <h2>Викторина завершена!</h2>
+            <div class="result-score" id="finalScore">0/10</div>
+            <div class="result-message" id="resultMessage"></div>
+            
+            <div class="result-details">
+                <h3>Ваши результаты:</h3>
+                <p>Правильных ответов: <span id="correctAnswers">0</span></p>
+                <p>Неправильных ответов: <span id="incorrectAnswers">0</span></p>
+                <p>Пропущенных вопросов: <span id="skippedAnswers">0</span></p>
+                <p>Процент правильных: <span id="percentage">0%</span></p>
+            </div>
+            
+            <button class="restart-btn" id="restartBtn">
+                <i class="fas fa-redo"></i> Пройти викторину снова
+            </button>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-ruble-sign"></i>
+                    <span>РубльГид</span>
+                    <p>Образовательный проект о российских банкнотах</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Быстрые ссылки</h4>
+                    <a href="index.html">Главная</a>
+                    <a href="collection.html">Коллекция</a>
+                    <a href="quiz.html">Викторина</a>
+                    <a href="symbols.html">Символика</a>
+                </div>
+                <div class="footer-info">
+                    <h4>Школьный проект</h4>
+                    <p>9 класс, 2026 год</p>
+                    <p>Тема: "Россия на денежных купюрах"</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 "Россия на денежных купюрах". Все права защищены.</p>
+                <div class="social-icons">
+                    <i class="fab fa-vk"></i>
+                    <i class="fab fa-telegram"></i>
+                    <i class="fab fa-youtube"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Скрипт викторины -->
+    <script>
+        // Вопросы для викторины
+        const quizQuestions = [
+            {
+                question: "Какой город изображен на купюре 1000 рублей?",
+                options: ["Ярославль", "Владимир", "Суздаль", "Кострома"],
+                correct: 0,
+                hint: "Этот город входит в Золотое кольцо России и был основан Ярославом Мудрым."
+            },
+            {
+                question: "Какое животное изображено на орнаменте купюры 5000 рублей?",
+                options: ["Амурский тигр", "Бурый медведь", "Соболь", "Волк"],
+                correct: 0,
+                hint: "Это редкое животное, занесенное в Красную книгу, обитает на Дальнем Востоке."
+            },
+            {
+                question: "Какой номинал имеет купюра с изображением Херсонеса Таврического?",
+                options: ["100 ₽", "200 ₽", "500 ₽", "1000 ₽"],
+                correct: 1,
+                hint: "Эта купюра появилась в 2017 году и посвящена Крыму."
+            },
+            {
+                question: "Что изображено на лицевой стороне купюры 100 рублей?",
+                options: ["Большой театр", "Кремль", "Храм Василия Блаженного", "Спасская башня"],
+                correct: 0,
+                hint: "На купюре изображена квадрига Аполлона на портике этого театра."
+            },
+            {
+                question: "В каком году была введена в обращение купюра 200 рублей?",
+                options: ["2015", "2017", "2019", "2021"],
+                correct: 1,
+                hint: "Эта купюра была выпущена после возвращения Крыма в состав России."
+            },
+            {
+                question: "Какой мост изображен на купюре 5000 рублей?",
+                options: ["Мост через Амур", "Мост через Енисей", "Мост через Волгу", "Мост через Неву"],
+                correct: 0,
+                hint: "Этот мост находится в Хабаровске и изображен на оборотной стороне купюры."
+            },
+            {
+                question: "Какое сооружение изображено на купюре 500 рублей?",
+                options: ["Соловецкий монастырь", "Кижи", "Троице-Сергиева лавра", "Валаам"],
+                correct: 0,
+                hint: "Этот монастырь находится на Соловецких островах в Белом море."
+            },
+            {
+                question: "Какой символ изображен на орнаменте купюры 100 рублей?",
+                options: ["Соболь", "Медведь", "Орел", "Лиса"],
+                correct: 0,
+                hint: "Это животное символизирует Сибирь и пушной промысел."
+            },
+            {
+                question: "Что изображено на купюре 10 рублей образца 2022 года?",
+                options: ["Красноярская ГЭС", "Байкальский целлюлозно-бумажный комбинат", "Саяно-Шушенская ГЭС", "Ленинградская АЭС"],
+                correct: 0,
+                hint: "Это гидроэлектростанция на реке Енисей в Красноярском крае."
+            },
+            {
+                question: "Какой памятник изображен на купюре 50 рублей?",
+                options: ["Петропавловская крепость", "Ростральная колонна", "Медный всадник", "Александрийский столп"],
+                correct: 1,
+                hint: "Эти колонны на Стрелке Васильевского острова ранее служили маяками."
+            }
+        ];
+
+        // Переменные викторины
+        let currentQuestion = 0;
+        let userAnswers = new Array(quizQuestions.length).fill(null);
+        let score = 0;
+        let timeLeft = 300; // 5 минут в секундах
+        let timerInterval;
+
+        // Инициализация викторины
+        document.addEventListener('DOMContentLoaded', function() {
+            // Меню для мобильных устройств
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                });
+            }
+            
+            // Закрытие меню при клике на ссылку
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                });
+            });
+            
+            // Загрузка первого вопроса
+            loadQuestion(currentQuestion);
+            
+            // Запуск таймера
+            startTimer();
+            
+            // Обработчики кнопок
+            document.getElementById('restartBtn').addEventListener('click', restartQuiz);
+        });
+
+        // Функция загрузки вопроса
+        function loadQuestion(questionIndex) {
+            const question = quizQuestions[questionIndex];
+            const questionContainer = document.getElementById('quizQuestions');
+            
+            // Обновляем счетчик
+            document.getElementById('questionCounter').textContent = 
+                `Вопрос ${questionIndex + 1} из ${quizQuestions.length}`;
+            
+            // Обновляем прогресс бар
+            const progress = ((questionIndex + 1) / quizQuestions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // Создаем HTML для вопроса
+            let optionsHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            question.options.forEach((option, index) => {
+                const isSelected = userAnswers[questionIndex] === index;
+                const isCorrect = index === question.correct;
+                let optionClass = 'option';
+                
+                if (isSelected) {
+                    optionClass += ' selected';
+                    if (isCorrect) {
+                        optionClass += ' correct';
+                    } else {
+                        optionClass += ' incorrect';
+                    }
+                }
+                
+                optionsHTML += `
+                    <div class="${optionClass}" data-index="${index}" onclick="selectOption(${index})">
+                        <div class="option-letter">${letters[index]}</div>
+                        <div class="option-text">${option}</div>
+                    </div>
+                `;
+            });
+            
+            const questionHTML = `
+                <div class="question-card">
+                    <div class="question-text">${question.question}</div>
+                    <div class="options-grid">
+                        ${optionsHTML}
+                    </div>
+                    
+                    <!-- Подсказка -->
+                    <div class="hint" id="hint${questionIndex}">
+                        <p><strong>Подсказка:</strong> ${question.hint}</p>
+                        <button class="hint-btn" onclick="hideHint(${questionIndex})">Скрыть подсказку</button>
+                    </div>
+                    
+                    <!-- Кнопка подсказки -->
+                    <button class="hint-btn" onclick="showHint(${questionIndex})" style="margin-top: 20px;">
+                        <i class="fas fa-lightbulb"></i> Показать подсказку
+                    </button>
+                    
+                    <!-- Навигация -->
+                    <div class="quiz-navigation">
+                        <button class="quiz-btn btn-prev" onclick="prevQuestion()" ${questionIndex === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-left"></i> Предыдущий вопрос
+                        </button>
+                        
+                        ${questionIndex < quizQuestions.length - 1 ? 
+                            `<button class="quiz-btn btn-next" onclick="nextQuestion()" ${userAnswers[questionIndex] === null ? 'disabled' : ''}>
+                                Следующий вопрос <i class="fas fa-arrow-right"></i>
+                            </button>` :
+                            `<button class="quiz-btn btn-submit" onclick="submitQuiz()" ${userAnswers[questionIndex] === null ? 'disabled' : ''}>
+                                <i class="fas fa-paper-plane"></i> Завершить викторину
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `;
+            
+            questionContainer.innerHTML = questionHTML;
+        }
+
+        // Функции викторины
+        function selectOption(optionIndex) {
+            userAnswers[currentQuestion] = optionIndex;
+            
+            // Обновляем отображение
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            // Добавляем классы выбранному варианту
+            const selectedOption = document.querySelector(`.option[data-index="${optionIndex}"]`);
+            selectedOption.classList.add('selected');
+            
+            // Показываем правильность ответа
+            if (optionIndex === quizQuestions[currentQuestion].correct) {
+                selectedOption.classList.add('correct');
+            } else {
+                selectedOption.classList.add('incorrect');
+                // Также показываем правильный ответ
+                const correctOption = document.querySelector(`.option[data-index="${quizQuestions[currentQuestion].correct}"]`);
+                correctOption.classList.add('correct');
+            }
+            
+            // Активируем кнопку "Далее"
+            const nextBtn = document.querySelector('.btn-next, .btn-submit');
+            if (nextBtn) {
+                nextBtn.disabled = false;
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < quizQuestions.length - 1) {
+                currentQuestion++;
+                loadQuestion(currentQuestion);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion(currentQuestion);
+            }
+        }
+
+        function showHint(questionIndex) {
+            const hint = document.getElementById(`hint${questionIndex}`);
+            hint.style.display = 'block';
+        }
+
+        function hideHint(questionIndex) {
+            const hint = document.getElementById(`hint${questionIndex}`);
+            hint.style.display = 'none';
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Меняем цвет при малом времени
+            if (timeLeft <= 60) {
+                document.getElementById('time').style.color = '#f44336';
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            // Подсчет результатов
+            score = 0;
+            let correct = 0;
+            let incorrect = 0;
+            let skipped = 0;
+            
+            userAnswers.forEach((answer, index) => {
+                if (answer === null) {
+                    skipped++;
+                } else if (answer === quizQuestions[index].correct) {
+                    correct++;
+                    score++;
+                } else {
+                    incorrect++;
+                }
+            });
+            
+            // Показываем результаты
+            document.getElementById('quizQuestions').style.display = 'none';
+            document.getElementById('questionCounter').style.display = 'none';
+            document.querySelector('.quiz-progress').style.display = 'none';
+            document.querySelector('.timer').style.display = 'none';
+            
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.style.display = 'block';
+            
+            // Заполняем результаты
+            document.getElementById('finalScore').textContent = `${score}/${quizQuestions.length}`;
+            document.getElementById('correctAnswers').textContent = correct;
+            document.getElementById('incorrectAnswers').textContent = incorrect;
+            document.getElementById('skippedAnswers').textContent = skipped;
+            document.getElementById('percentage').textContent = `${Math.round((score / quizQuestions.length) * 100)}%`;
+            
+            // Добавляем сообщение в зависимости от результата
+            const message = document.getElementById('resultMessage');
+            const percentage = (score / quizQuestions.length) * 100;
+            
+            if (percentage >= 90) {
+                message.textContent = "Отличный результат! Вы настоящий эксперт по российским банкнотам!";
+                message.style.color = "#4CAF50";
+            } else if (percentage >= 70) {
+                message.textContent = "Хороший результат! Вы хорошо разбираетесь в российских банкнотах.";
+                message.style.color = "#8BC34A";
+            } else if (percentage >= 50) {
+                message.textContent = "Неплохой результат! Есть что повторить.";
+                message.style.color = "#FFC107";
+            } else {
+                message.textContent = "Попробуйте изучить коллекцию банкнот и пройти викторину снова!";
+                message.style.color = "#f44336";
+            }
+        }
+
+        function restartQuiz() {
+            // Сброс переменных
+            currentQuestion = 0;
+            userAnswers = new Array(quizQuestions.length).fill(null);
+            score = 0;
+            timeLeft = 300;
+            
+            // Сброс отображения
+            document.getElementById('quizQuestions').style.display = 'block';
+            document.getElementById('questionCounter').style.display = 'block';
+            document.querySelector('.quiz-progress').style.display = 'block';
+            document.querySelector('.timer').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('time').style.color = '#e65100';
+            
+            // Перезагрузка первого вопроса
+            loadQuestion(currentQuestion);
+            
+            // Перезапуск таймера
+            clearInterval(timerInterval);
+            startTimer();
+        }
+    </script>
+</body>
+</html>

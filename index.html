@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Россия на денежных купюрах | Главная</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Дополнительные стили для карты */
+        .map-image {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(to bottom, #a8d8ff, #e6f2ff);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #1a237e;
+        }
+        
+        .map-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 40%, #87CEEB 2px, transparent 3px),
+                radial-gradient(circle at 70% 60%, #87CEEB 2px, transparent 3px),
+                radial-gradient(circle at 40% 70%, #87CEEB 2px, transparent 3px),
+                radial-gradient(circle at 60% 30%, #87CEEB 2px, transparent 3px),
+                radial-gradient(circle at 20% 50%, #87CEEB 2px, transparent 3px);
+            background-size: 100px 100px;
+        }
+        
+        .map-dots {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .city-dot {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #ff5252;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .city-dot:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+            z-index: 100;
+        }
+        
+        .city-dot::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 82, 82, 0.2);
+            transform: translate(-50%, -50%);
+            animation: ripple 2s infinite;
+        }
+        
+        .city-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .city-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.85);
+        }
+        
+        .city-dot:hover .city-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .city-name {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .city-info {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 82, 82, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); }
+        }
+        
+        @keyframes ripple {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+        
+        /* Легенда карты */
+        .map-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .legend-item:hover {
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+        
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        /* Улучшенные стили для списка городов */
+        .cities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .city-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+        
+        .city-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+            border-left-color: #1a237e;
+        }
+        
+        .city-item i {
+            font-size: 1.5rem;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .city-content h4 {
+            color: #1a237e;
+            margin-bottom: 5px;
+        }
+        
+        .city-content p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка сайта -->
+    <header class="main-header">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-ruble-sign"></i>
+                <span>РубльГид</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Главная</a></li>
+                <li><a href="collection.html"><i class="fas fa-money-bill-wave"></i> Коллекция</a></li>
+                <li><a href="quiz.html"><i class="fas fa-question-circle"></i> Викторина</a></li>
+                <li><a href="symbols.html"><i class="fas fa-dove"></i> Символика</a></li>
+            </ul>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Герой секция с фоновым изображением -->
+    <section class="hero" style="background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;">
+        <div class="hero-content">
+            <h1 class="glitch" data-text="РОССИЯ НА КУПЮРАХ">РОССИЯ НА КУПЮРАХ</h1>
+            <p class="subtitle">Путешествие по 7 городам через банкноты от 10 до 5000 рублей</p>
+            <div class="hero-buttons">
+                <a href="collection.html" class="btn btn-primary">
+                    <i class="fas fa-coins"></i> Изучить коллекцию
+                </a>
+                <a href="quiz.html" class="btn btn-secondary">
+                    <i class="fas fa-brain"></i> Пройти викторину
+                </a>
+            </div>
+        </div>
+        <div class="scroll-down">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- Статистика -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-city"></i>
+                    <h3>7</h3>
+                    <p>Городов России</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-money-bill"></i>
+                    <h3>7</h3>
+                    <p>Банкнот</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-landmark"></i>
+                    <h3>20+</h3>
+                    <p>Памятников</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-paw"></i>
+                    <h3>5</h3>
+                    <p>Животных-символов</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Галерея превью купюр -->
+    <section class="preview-gallery">
+        <div class="container">
+            <h2>Коллекция банкнот</h2>
+            <p class="section-subtitle">Наведите на купюру, чтобы узнать город</p>
+            
+            <div class="gallery-grid">
+                <!-- Купюра 10 рублей -->
+                <div class="banknote-card">
+                    <div class="banknote-img">
+                        <div style="background: linear-gradient(135deg, #2E7D32, #4CAF50); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                            10 ₽
+                        </div>
+                        <div class="banknote-overlay">
+                            <h3>Красноярск</h3>
+                            <p>Коммунальный мост и ГЭС</p>
+                        </div>
+                    </div>
+                    <div class="banknote-info">
+                        <span class="nominal">10 ₽</span>
+                        <span class="year">2022</span>
+                    </div>
+                </div>
+
+                <!-- Купюра 50 рублей -->
+                <div class="banknote-card">
+                    <div class="banknote-img">
+                        <div style="background: linear-gradient(135deg, #1976D2, #2196F3); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                            50 ₽
+                        </div>
+                        <div class="banknote-overlay">
+                            <h3>Санкт-Петербург</h3>
+                            <p>Ростральная колонна</p>
+                        </div>
+                    </div>
+                    <div class="banknote-info">
+                        <span class="nominal">50 ₽</span>
+                        <span class="year">1997</span>
+                    </div>
+                </div>
+
+                <!-- Купюра 100 рублей -->
+                <div class="banknote-card">
+                    <div class="banknote-img">
+                        <div style="background: linear-gradient(135deg, #5D4037, #795548); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                            100 ₽
+                        </div>
+                        <div class="banknote-overlay">
+                            <h3>Москва</h3>
+                            <p>Большой театр</p>
+                        </div>
+                    </div>
+                    <div class="banknote-info">
+                        <span class="nominal">100 ₽</span>
+                        <span class="year">1997</span>
+                    </div>
+                </div>
+
+                <!-- Купюра 200 рублей -->
+                <div class="banknote-card">
+                    <div class="banknote-img">
+                        <div style="background: linear-gradient(135deg, #388E3C, #4CAF50); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                            200 ₽
+                        </div>
+                        <div class="banknote-overlay">
+                            <h3>Севастополь</h3>
+                            <p>Памятник затопленным кораблям</p>
+                        </div>
+                    </div>
+                    <div class="banknote-info">
+                        <span class="nominal">200 ₽</span>
+                        <span class="year">2017</span>
+                    </div>
+                </div>
+
+                <!-- Купюра 500 рублей -->
+                <div class="banknote-card">
+                    <div class="banknote-img">
+                        <div style="background: linear-gradient(135deg, #7B1FA2, #9C27B0); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                            500 ₽
+                        </div>
+                        <div class="banknote-overlay">
+                            <h3>Архангельск</h3>
+                            <p>Соловецкий монастырь</p>
+                        </div>
+                    </div>
+                    <div class="banknote-info">
+                        <span class="nominal">500 ₽</span>
+                        <span class="year">1997</span>
+                    </div>
+                </div>
+
+                <!-- Купюра 1000 рублей -->
+                <div class="banknote-card">
+                    <div class="banknote-img">
+                        <div style="background: linear-gradient(135deg, #0288D1, #03A9F4); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                            1000 ₽
+                        </div>
+                        <div class="banknote-overlay">
+                            <h3>Ярославль</h3>
+                            <p>Памятник Ярославу Мудрому</p>
+                        </div>
+                    </div>
+                    <div class="banknote-info">
+                        <span class="nominal">1000 ₽</span>
+                        <span class="year">1997</span>
+                    </div>
+                </div>
+
+                <!-- Купюра 5000 рублей -->
+                <div class="banknote-card">
+                    <div class="banknote-img">
+                        <div style="background: linear-gradient(135deg, #D32F2F, #F44336); height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                            5000 ₽
+                        </div>
+                        <div class="banknote-overlay">
+                            <h3>Хабаровск</h3>
+                            <p>Памятник Муравьёву-Амурскому</p>
+                        </div>
+                    </div>
+                    <div class="banknote-info">
+                        <span class="nominal">5000 ₽</span>
+                        <span class="year">1997</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <a href="collection.html" class="btn btn-large">
+                    <i class="fas fa-arrow-right"></i> Посмотреть все детали
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Карта России с городами -->
+    <section class="map-section" style="background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)), url('https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover;">
+        <div class="container">
+            <h2 class="section-title">Города на банкнотах</h2>
+            <p class="section-subtitle" style="text-align: center; margin-bottom: 40px;">Нажмите на город на карте или в списке для подробной информации</p>
+            
+            <div class="map-container">
+                <div class="cities-list">
+                    <!-- Красноярск -->
+                    <div class="city-item" data-city="krasnoyarsk">
+                        <i class="fas fa-map-marker-alt" style="color: #4CAF50;"></i>
+                        <div class="city-content">
+                            <h4>Красноярск</h4>
+                            <p>10 рублей • Коммунальный мост • Красноярская ГЭС</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Санкт-Петербург -->
+                    <div class="city-item" data-city="petersburg">
+                        <i class="fas fa-map-marker-alt" style="color: #2196F3;"></i>
+                        <div class="city-content">
+                            <h4>Санкт-Петербург</h4>
+                            <p>50 рублей • Ростральная колонна • Петропавловская крепость</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Москва -->
+                    <div class="city-item" data-city="moscow">
+                        <i class="fas fa-map-marker-alt" style="color: #795548;"></i>
+                        <div class="city-content">
+                            <h4>Москва</h4>
+                            <p>100 рублей • Большой театр • Квадрига Аполлона</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Севастополь -->
+                    <div class="city-item" data-city="sevastopol">
+                        <i class="fas fa-map-marker-alt" style="color: #388E3C;"></i>
+                        <div class="city-content">
+                            <h4>Севастополь</h4>
+                            <p>200 рублей • Памятник затопленным кораблям • Херсонес Таврический</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Архангельск -->
+                    <div class="city-item" data-city="arkhangelsk">
+                        <i class="fas fa-map-marker-alt" style="color: #9C27B0;"></i>
+                        <div class="city-content">
+                            <h4>Архангельск</h4>
+                            <p>500 рублей • Памятник Петру I • Соловецкий монастырь</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Ярославль -->
+                    <div class="city-item" data-city="yaroslavl">
+                        <i class="fas fa-map-marker-alt" style="color: #0288D1;"></i>
+                        <div class="city-content">
+                            <h4>Ярославль</h4>
+                            <p>1000 рублей • Памятник Ярославу Мудрому • Церковь Иоанна Предтечи</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Хабаровск -->
+                    <div class="city-item" data-city="khabarovsk">
+                        <i class="fas fa-map-marker-alt" style="color: #F44336;"></i>
+                        <div class="city-content">
+                            <h4>Хабаровск</h4>
+                            <p>5000 рублей • Памятник Муравьёву-Амурскому • Мост через Амур</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Интерактивная карта -->
+                <div class="map-image">
+                    <div class="map-base"></div>
+                    <div class="map-dots">
+                        <!-- Красноярск (Сибирь) -->
+                        <div class="city-dot" style="top: 50%; left: 75%;" data-city="krasnoyarsk">
+                            <div class="city-tooltip">
+                                <div class="city-name">Красноярск</div>
+                                <div class="city-info">10 рублей • Коммунальный мост</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Санкт-Петербург (Северо-Запад) -->
+                        <div class="city-dot" style="top: 20%; left: 25%;" data-city="petersburg">
+                            <div class="city-tooltip">
+                                <div class="city-name">Санкт-Петербург</div>
+                                <div class="city-info">50 рублей • Ростральная колонна</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Москва (Центр) -->
+                        <div class="city-dot" style="top: 30%; left: 40%;" data-city="moscow">
+                            <div class="city-tooltip">
+                                <div class="city-name">Москва</div>
+                                <div class="city-info">100 рублей • Большой театр</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Севастополь (Крым) -->
+                        <div class="city-dot" style="top: 45%; left: 15%;" data-city="sevastopol">
+                            <div class="city-tooltip">
+                                <div class="city-name">Севастополь</div>
+                                <div class="city-info">200 рублей • Херсонес Таврический</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Архангельск (Север) -->
+                        <div class="city-dot" style="top: 15%; left: 45%;" data-city="arkhangelsk">
+                            <div class="city-tooltip">
+                                <div class="city-name">Архангельск</div>
+                                <div class="city-info">500 рублей • Соловецкий монастырь</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ярославль (Центр) -->
+                        <div class="city-dot" style="top: 28%; left: 45%;" data-city="yaroslavl">
+                            <div class="city-tooltip">
+                                <div class="city-name">Ярославль</div>
+                                <div class="city-info">1000 рублей • Памятник Ярославу Мудрому</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Хабаровск (Дальний Восток) -->
+                        <div class="city-dot" style="top: 35%; left: 92%;" data-city="khabarovsk">
+                            <div class="city-tooltip">
+                                <div class="city-name">Хабаровск</div>
+                                <div class="city-info">5000 рублей • Мост через Амур</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Контуры России -->
+                    <div style="position: absolute; top: 10%; left: 15%; width: 70%; height: 80%; border: 2px dashed #1a237e; border-radius: 15px; pointer-events: none;"></div>
+                    <div style="position: absolute; top: 15%; left: 70%; width: 25%; height: 30%; border: 2px dashed #1a237e; border-radius: 10px; pointer-events: none;"></div>
+                    <div style="position: absolute; top: 40%; left: 10%; width: 10%; height: 15%; border: 2px dashed #1a237e; border-radius: 5px; pointer-events: none;"></div>
+                    
+                    <!-- Подписи морей -->
+                    <div style="position: absolute; top: 5%; left: 30%; color: #1a237e; font-size: 0.9rem; font-weight: bold; opacity: 0.7;">Баренцево море</div>
+                    <div style="position: absolute; top: 50%; left: 5%; color: #1a237e; font-size: 0.9rem; font-weight: bold; opacity: 0.7;">Чёрное море</div>
+                    <div style="position: absolute; top: 85%; left: 85%; color: #1a237e; font-size: 0.9rem; font-weight: bold; opacity: 0.7;">Охотское море</div>
+                </div>
+            </div>
+            
+            <!-- Легенда карты -->
+            <div class="map-legend">
+                <div class="legend-item" data-city="krasnoyarsk">
+                    <div class="legend-dot" style="background: #4CAF50;"></div>
+                    <span>Красноярск (10 ₽)</span>
+                </div>
+                <div class="legend-item" data-city="petersburg">
+                    <div class="legend-dot" style="background: #2196F3;"></div>
+                    <span>Санкт-Петербург (50 ₽)</span>
+                </div>
+                <div class="legend-item" data-city="moscow">
+                    <div class="legend-dot" style="background: #795548;"></div>
+                    <span>Москва (100 ₽)</span>
+                </div>
+                <div class="legend-item" data-city="sevastopol">
+                    <div class="legend-dot" style="background: #388E3C;"></div>
+                    <span>Севастополь (200 ₽)</span>
+                </div>
+                <div class="legend-item" data-city="arkhangelsk">
+                    <div class="legend-dot" style="background: #9C27B0;"></div>
+                    <span>Архангельск (500 ₽)</span>
+                </div>
+                <div class="legend-item" data-city="yaroslavl">
+                    <div class="legend-dot" style="background: #0288D1;"></div>
+                    <span>Ярославль (1000 ₽)</span>
+                </div>
+                <div class="legend-item" data-city="khabarovsk">
+                    <div class="legend-dot" style="background: #F44336;"></div>
+                    <span>Хабаровск (5000 ₽)</span>
+                </div>
+            </div>
+            
+            <p class="map-caption" style="text-align: center; margin-top: 30px; color: #666; font-style: italic;">
+                Карта городов, изображенных на российских банкнотах
+            </p>
+        </div>
+    </section>
+
+    <!-- Призыв к действию -->
+    <section class="cta-section" style="background: linear-gradient(135deg, #1a237e 0%, #283593 100%);">
+        <div class="container">
+            <h2>Проверьте свои знания!</h2>
+            <p>Пройдите интерактивную викторину и узнайте, насколько хорошо вы знаете российские банкноты</p>
+            <a href="quiz.html" class="btn btn-large btn-glow">
+                <i class="fas fa-play-circle"></i> Начать викторину
+            </a>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-ruble-sign"></i>
+                    <span>РубльГид</span>
+                    <p>Образовательный проект о российских банкнотах</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Быстрые ссылки</h4>
+                    <a href="index.html">Главная</a>
+                    <a href="collection.html">Коллекция</a>
+                    <a href="quiz.html">Викторина</a>
+                    <a href="symbols.html">Символика</a>
+                </div>
+                <div class="footer-info">
+                    <h4>Школьный проект</h4>
+                    <p>9 класс, 2024 год</p>
+                    <p>Тема: "Россия на денежных купюрах"</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 "Россия на денежных купюрах". Все права защищены.</p>
+                <div class="social-icons">
+                    <i class="fab fa-vk"></i>
+                    <i class="fab fa-telegram"></i>
+                    <i class="fab fa-youtube"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Скрипты -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Меню для мобильных устройств
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                });
+            }
+            
+            // Закрытие меню при клике на ссылку
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                });
+            });
+            
+            // Обработка кликов на карте
+            const cityDots = document.querySelectorAll('.city-dot');
+            const cityItems = document.querySelectorAll('.city-item');
+            const legendItems = document.querySelectorAll('.legend-item');
+            
+            // Информация о городах и соответствующих банкнотах
+            const cityInfo = {
+                'krasnoyarsk': { banknote: '10', page: 'collection.html#banknote-10' },
+                'petersburg': { banknote: '50', page: 'collection.html#banknote-50' },
+                'moscow': { banknote: '100', page: 'collection.html#banknote-100' },
+                'sevastopol': { banknote: '200', page: 'collection.html#banknote-200' },
+                'arkhangelsk': { banknote: '500', page: 'collection.html#banknote-500' },
+                'yaroslavl': { banknote: '1000', page: 'collection.html#banknote-1000' },
+                'khabarovsk': { banknote: '5000', page: 'collection.html#banknote-5000' }
+            };
+            
+            // Функция для показа информации о городе
+            function showCityInfo(cityId) {
+                const info = cityInfo[cityId];
+                if (info) {
+                    const message = `Город: ${getCityName(cityId)}\nБанкнота: ${info.banknote} рублей\n\nПерейти к подробной информации?`;
+                    if (confirm(message)) {
+                        window.location.href = info.page;
+                    }
+                }
+            }
+            
+            // Функция для получения названия города
+            function getCityName(cityId) {
+                const names = {
+                    'krasnoyarsk': 'Красноярск',
+                    'petersburg': 'Санкт-Петербург',
+                    'moscow': 'Москва',
+                    'sevastopol': 'Севастополь',
+                    'arkhangelsk': 'Архангельск',
+                    'yaroslavl': 'Ярославль',
+                    'khabarovsk': 'Хабаровск'
+                };
+                return names[cityId] || 'Неизвестный город';
+            }
+            
+            // Добавляем обработчики для точек на карте
+            cityDots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    const cityId = this.getAttribute('data-city');
+                    showCityInfo(cityId);
+                });
+            });
+            
+            // Добавляем обработчики для элементов списка
+            cityItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const cityId = this.getAttribute('data-city');
+                    showCityInfo(cityId);
+                });
+            });
+            
+            // Добавляем обработчики для элементов легенды
+            legendItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const cityId = this.getAttribute('data-city');
+                    showCityInfo(cityId);
+                });
+            });
+            
+            // Подсветка соответствующей точки при наведении на элемент списка
+            cityItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    const cityId = this.getAttribute('data-city');
+                    const correspondingDot = document.querySelector(`.city-dot[data-city="${cityId}"]`);
+                    if (correspondingDot) {
+                        correspondingDot.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                        correspondingDot.style.zIndex = '1000';
+                    }
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    const cityId = this.getAttribute('data-city');
+                    const correspondingDot = document.querySelector(`.city-dot[data-city="${cityId}"]`);
+                    if (correspondingDot) {
+                        correspondingDot.style.transform = 'translate(-50%, -50%) scale(1)';
+                        correspondingDot.style.zIndex = '10';
+                    }
+                });
+            });
+            
+            // Анимация появления элементов при скролле
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                    }
+                });
+            }, observerOptions);
+            
+            // Наблюдаем за элементами
+            document.querySelectorAll('.stat-card, .banknote-card, .city-item').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Плавный скролл для якорей
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Анимация чисел в статистике
+            function animateStats() {
+                const statNumbers = document.querySelectorAll('.stat-card h3');
+                
+                statNumbers.forEach(stat => {
+                    const target = parseInt(stat.textContent);
+                    let current = 0;
+                    const increment = target / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        stat.textContent = Math.floor(current);
+                    }, 30);
+                });
+            }
+            
+            // Запуск анимации статистики при попадании в область видимости
+            const statsSection = document.querySelector('.stats');
+            const statsObserver = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    animateStats();
+                    statsObserver.unobserve(statsSection);
+                }
+            }, { threshold: 0.5 });
+            
+            if (statsSection) {
+                statsObserver.observe(statsSection);
+            }
+            
+            // Добавление класса для анимации
+            document.querySelectorAll('.banknote-card').forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>
